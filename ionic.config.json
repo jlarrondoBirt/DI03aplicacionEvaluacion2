@@ -1,0 +1,7 @@
+{
+  "name": "DI03aplicacionEvaluacion1",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
