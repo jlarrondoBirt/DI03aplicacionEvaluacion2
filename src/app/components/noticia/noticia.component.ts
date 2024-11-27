@@ -40,5 +40,4 @@ export class NoticiaComponent implements OnInit {
 
     await alert.present();
   }
-
 }

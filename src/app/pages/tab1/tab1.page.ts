@@ -11,22 +11,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class Tab1Page implements OnInit {
 
-  // Creo e inicializo un array vacío
   listaNoticias: IArticle[] = [];
   respuesta: Observable<RespuestaNoticias> = {} as Observable<RespuestaNoticias>;
 
   constructor(private leerFichero: HttpClient, public gestionNoticiasLeer: GestionNoticiasLeerService) {
     this.cargarFichero();
-  }
-
-  // Al cambiar el check, añade o borra la noticia
-  check(eventoRecibido: any, item: IArticle) {
-    let estado: boolean = eventoRecibido.detail.checked;
-    if (estado) {
-      this.gestionNoticiasLeer.addNoticia(item);
-    } else {
-      this.gestionNoticiasLeer.borrarNoticia(item);
-    }
   }
 
   // Lee el fichero con los artículos
@@ -40,7 +29,17 @@ export class Tab1Page implements OnInit {
     } );
   }
 
-  // Comprueba si la noticia está para leer
+    // Al cambiar el check, se añade o se borra la noticia
+    check(eventoRecibido: any, item: IArticle) {
+      let estado: boolean = eventoRecibido.detail.checked;
+      if (estado) {
+        this.gestionNoticiasLeer.addNoticia(item);
+      } else {
+        this.gestionNoticiasLeer.borrarNoticia(item);
+      }
+    }
+
+  // Comprueba si la noticia está con check para leer
   seleccionado(item: IArticle): boolean {
     let indice: number = this.gestionNoticiasLeer.buscarNoticia(item);
     if (indice != -1) {
