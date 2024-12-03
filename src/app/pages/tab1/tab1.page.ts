@@ -11,43 +11,65 @@ import { Component, OnInit } from '@angular/core';
 })
 export class Tab1Page implements OnInit {
 
+  // Array para la cabecera de las noticias
+  categorias: string[] = ["general", "business", "technology", "science", "sports"];
+
+  // Creo e inicializo un array vacío
   listaNoticias: IArticle[] = [];
-  respuesta: Observable<RespuestaNoticias> = {} as Observable<RespuestaNoticias>;
 
   constructor(private leerFichero: HttpClient, public gestionNoticiasLeer: GestionNoticiasLeerService) {
-    this.cargarFichero();
+    // this.cargarFichero();
+    this.cargarCategoria(this.categorias[0]);
   }
 
-  // Lee el fichero con los artículos
+  ngOnInit() {
+  }
+
+  // Lee el fichero con los artículos y los guarda en el array "listaNoticias"
   private cargarFichero() {
 
     let respuesta: Observable<RespuestaNoticias> = this.leerFichero.get<RespuestaNoticias>("/assets/datos/articulos.json");
 
     respuesta.subscribe( resp => {
-      console.log("Noticias", resp);
+      if (resp) {
+        // console.log("Noticias", resp);
+        this.listaNoticias.push(... resp.articles);
+      }
+    } );
+  }
+
+  // Comprueba si se ha seleccionado o no el artículo y en función de ello añade o borra la noticia
+  public check(eventoRecibido: any, item: IArticle) {
+    let estado: boolean = eventoRecibido.detail.checked;
+    if (estado) {
+      this.gestionNoticiasLeer.addNoticia(item);
+    } else {
+      this.gestionNoticiasLeer.borrarNoticia(item);
+    }
+  }
+
+  // En función de la categoría elegida se realiza la consulta REST correspondiente
+  public cambiarCategoria(eventoRecibido: any) {
+    this.listaNoticias = [];
+    this.cargarCategoria(eventoRecibido.detail.value);
+  }
+
+  // Se realiza la consulta REST de una categoría
+  private cargarCategoria(categoria: string) {
+    let respuesta: Observable<RespuestaNoticias> = this.leerFichero.get<RespuestaNoticias>("https://newsapi.org/v2/top-headlines?category=" + categoria + "&apiKey=b883c8f523d741a08035b2d6dc47f0e2");
+
+    respuesta.subscribe( resp => {
+      // console.log("Noticias", resp);
       this.listaNoticias.push(... resp.articles);
     } );
   }
 
-    // Al cambiar el check, se añade o se borra la noticia
-    check(eventoRecibido: any, item: IArticle) {
-      let estado: boolean = eventoRecibido.detail.checked;
-      if (estado) {
-        this.gestionNoticiasLeer.addNoticia(item);
-      } else {
-        this.gestionNoticiasLeer.borrarNoticia(item);
-      }
+  // Comprueba si un artículo está en la lista para leer
+  public buscar(articulo: IArticle): boolean {
+    let indice = this.gestionNoticiasLeer.buscarNoticia(articulo);
+    if (indice == -1) {
+      return false;
     }
-
-  // Comprueba si la noticia está con check para leer
-  seleccionado(item: IArticle): boolean {
-    let indice: number = this.gestionNoticiasLeer.buscarNoticia(item);
-    if (indice != -1) {
-      return true;
-    }
-    return false;
-  }
-
-  ngOnInit() {
+    return true;
   }
 }

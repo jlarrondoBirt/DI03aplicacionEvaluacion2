@@ -1,5 +1,6 @@
 import { IArticle } from './../interfaces/articulos-interfaces';
 import { Injectable } from '@angular/core';
+import { GestionCapacitorStorageService } from './gestion-capacitor-storage.service';
 
 @Injectable({
   providedIn: 'root'
@@ -8,8 +9,14 @@ export class GestionNoticiasLeerService {
 
   private noticiasLeer: IArticle [] = [];
 
-  constructor() {
-
+  constructor(private gestionStorage: GestionCapacitorStorageService) {
+    let datosPromesa: Promise<IArticle[]> = gestionStorage.getObject("noticiasLeer");
+    datosPromesa.then( datos => {
+      if (datos) {
+        // console.log(datos);
+        this.noticiasLeer.push(...datos);
+      }
+    });
   }
 
   // Añade una nueva noticia a leer
@@ -20,16 +27,17 @@ export class GestionNoticiasLeerService {
 
     // Añadirlo
     this.noticiasLeer.push(item);
+    this.gestionStorage.setObject("noticiasLeer", this.noticiasLeer);
   }
 
-  // Comprueba si una noticia ya está en el array
-  buscarNoticia(item: IArticle): number  {
-    let articuloEncontrado: any = this.noticiasLeer.find(
-      function(cadaArticulo) {
+  // Comprueba si una noticia ya está en el array  // Se busca un artículo en el array
+  public buscarNoticia(item: IArticle): number  {
+    let indice: number = this.noticiasLeer.findIndex(
+      function(cadaArticulo) { 
         return JSON.stringify(cadaArticulo) == JSON.stringify(item);
       }
     );
-    let indice = this.noticiasLeer.indexOf(articuloEncontrado);
+    //let indice = this.noticiasLeer.indexOf(articuloEncontrado);
     return indice;
   }
 
@@ -38,6 +46,7 @@ export class GestionNoticiasLeerService {
     let indice = this.buscarNoticia(item);
     if (indice != -1) {
       this.noticiasLeer.splice(indice, 1);
+      this.gestionStorage.setObject("noticiasLeer", this.noticiasLeer);
     }
   }
 
